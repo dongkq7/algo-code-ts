@@ -2,8 +2,18 @@ class TreeNode<T> {
   value: T
   left: TreeNode<T> | null = null
   right: TreeNode<T> | null = null
+  // 当前节点的父节点
+  parent: TreeNode<T> | null = null
   constructor(value: T) {
     this.value = value
+  }
+  // 当前节点是否为父节点的左子节点
+  get isLeft() { 
+    return !!(this.parent && this.parent.left === this)
+  }
+  // 当前节点是否为父节点的右子节点
+  get isRight() {
+    return !!(this.parent && this.parent.right === this)
   }
 }
 
@@ -120,16 +130,76 @@ class BSTree<T> {
 
   // 搜索指定数据
   search(value: T): boolean {
+    return !!this.searchNode(value)
+  }
+  private searchNode(value: T): TreeNode<T> | null {
     let currentNode = this.root
+    let parentNode: TreeNode<T> | null = null
     while(currentNode) {
-      if (currentNode.value === value) return true
+      if (currentNode.value === value) return currentNode
+
+      parentNode = currentNode
       if (currentNode.value > value) {
         currentNode = currentNode.left
       } else {
         currentNode = currentNode.right
       }
+      if (currentNode) currentNode.parent = parentNode
     }
-    return false
+    return null
+  }
+
+  // 获取当前节点（删除节点）的后继节点
+  private getSuccessor(delNode: TreeNode<T>): TreeNode<T> {
+    let current = delNode.right
+    let successor: TreeNode<T> | null = null
+    while(current) {
+      successor = current
+      current = current.left
+      if (current) {
+        current.parent = successor
+      }
+    }
+    // 如果后继节点不是删除节点的right，那么需要将删除节点的right给后继节点
+    if (successor !== delNode.right) {
+      successor!.parent!.left = successor!.right
+      successor!.right = delNode.right
+    }
+    // 将删除节点的left给后继节点的left
+    successor!.left = delNode.left
+    return successor!
+  }
+  // 删除指定节点
+  remove(value: T): boolean {
+    const currentNode = this.searchNode(value)
+    // 如果没有找到指定节点直接返回false
+    if (!currentNode) return false
+    
+    // 需要被替换上去的节点
+    let replaceNode: TreeNode<T> | null = null
+    // 如果删除的是叶子节点
+    if (currentNode.left === null && currentNode.right === null) {
+      replaceNode = null
+    } else if (currentNode.right === null) {
+      // 如果删除的节点只有一个左子节点
+      replaceNode = currentNode.left
+    } else if (currentNode.left === null) {
+      // 如果删除的节点只有一个右子节点
+      replaceNode = currentNode.right
+    } else {
+      // 如果删除的有两个子节点
+      // 获取到删除节点的后继节点
+      const successor = this.getSuccessor(currentNode)
+      replaceNode = successor
+    }
+    if (this.root === currentNode) {
+      this.root = replaceNode
+    } else if (currentNode.isLeft) {
+      currentNode.parent!.left = replaceNode
+    } else {
+      currentNode.parent!.right = replaceNode
+    }
+    return true
   }
 }
 
@@ -156,5 +226,8 @@ bsTree.insert(6)
 // bsTree.levelOrderTraverse()
 // console.log(bsTree.max())
 // console.log(bsTree.min())
-console.log(bsTree.search(99))
-console.log(bsTree.search(13))
+// console.log(bsTree.search(99))
+// console.log(bsTree.search(13))
+bsTree.remove(11)
+bsTree.remove(15)
+bsTree.levelOrderTraverse()
