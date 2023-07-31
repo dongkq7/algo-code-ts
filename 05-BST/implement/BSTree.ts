@@ -98,6 +98,39 @@ class BSTree<T> {
       }
     }
   }
+
+  // 获取最大值
+  max() {
+    if (!this.root) return null
+    let currentNode = this.root
+    while(currentNode && currentNode.right) {
+      currentNode = currentNode.right
+    }
+    return currentNode.value
+  }
+  // 获取最小值
+  min() {
+    if (!this.root) return null
+    let currentNode = this.root
+    while(currentNode && currentNode.left) {
+      currentNode = currentNode.left
+    }
+    return currentNode.value
+  }
+
+  // 搜索指定数据
+  search(value: T): boolean {
+    let currentNode = this.root
+    while(currentNode) {
+      if (currentNode.value === value) return true
+      if (currentNode.value > value) {
+        currentNode = currentNode.left
+      } else {
+        currentNode = currentNode.right
+      }
+    }
+    return false
+  }
 }
 
 // test
@@ -120,4 +153,8 @@ bsTree.insert(6)
 // bsTree.preOrderTraverse()
 // bsTree.inOrderTraverse()
 // bsTree.postOrderTraverse()
-bsTree.levelOrderTraverse()
+// bsTree.levelOrderTraverse()
+// console.log(bsTree.max())
+// console.log(bsTree.min())
+console.log(bsTree.search(99))
+console.log(bsTree.search(13))
