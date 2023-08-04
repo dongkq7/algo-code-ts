@@ -41,12 +41,10 @@ class BSTree<T> {
       }
     } else {
       // 如果新节点的value比原节点value要大，那么就去右子树去找
-      if (newNode.value > node.value) {
-        if (node.right === null) {
-          node.right = newNode
-        } else {
-          this.insertNode(node.right, newNode)
-        }
+      if (node.right === null) {
+        node.right = newNode
+      } else {
+        this.insertNode(node.right, newNode)
       }
     }
   }
