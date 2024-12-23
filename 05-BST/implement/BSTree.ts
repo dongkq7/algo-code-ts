@@ -149,23 +149,40 @@ class BSTree<T> {
 
   // 获取当前节点（删除节点）的后继节点
   private getSuccessor(delNode: TreeNode<T>): TreeNode<T> {
-    let current = delNode.right
-    let successor: TreeNode<T> | null = null
-    while(current) {
-      successor = current
-      current = current.left
-      if (current) {
-        current.parent = successor
-      }
+    let replaceNode = delNode.right
+    let parentNode: TreeNode<T>  = delNode
+    while(replaceNode && replaceNode.left) {
+      parentNode = replaceNode
+      replaceNode = replaceNode.left
     }
-    // 如果后继节点不是删除节点的right，那么需要将删除节点的right给后继节点
-    if (successor !== delNode.right) {
-      successor!.parent!.left = successor!.right
-      successor!.right = delNode.right
+    replaceNode.parent = parentNode
+
+    // 如果后继节点不是要删除节点的右节点，那么说明删除节点的右节点存在左子树
+    if (replaceNode !== delNode.right) {
+      // 改变一下后继节点父节点的左子树，因为后继节点肯定是其父节点的左子节点
+      replaceNode.parent.left = replaceNode.right
+      replaceNode.right = delNode.right
     }
-    // 将删除节点的left给后继节点的left
-    successor!.left = delNode.left
-    return successor!
+    replaceNode.left = delNode.left
+    return replaceNode
+    
+    // let current = delNode.right
+    // let successor: TreeNode<T> | null = null
+    // while(current) {
+    //   successor = current
+    //   current = current.left
+    //   if (current) {
+    //     current.parent = successor
+    //   }
+    // }
+    // // 如果后继节点不是删除节点的right，那么需要将删除节点的right给后继节点
+    // if (successor !== delNode.right) {
+    //   successor!.parent!.left = successor!.right
+    //   successor!.right = delNode.right
+    // }
+    // // 将删除节点的left给后继节点的left
+    // successor!.left = delNode.left
+    // return successor!
   }
   // 删除指定节点
   remove(value: T): boolean {

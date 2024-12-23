@@ -1,0 +1,23 @@
+{
+  "name": "algo-code-ts",
+  "version": "1.0.0",
+  "description": "每天进步一点点 逐步攻克算法",
+  "main": "index.js",
+  "scripts": {
+    "stack": "ts-node 01-Stack/implement/test.ts",
+    "queue": "ts-node 02-Queue/implement/test.ts",
+    "linkedList": "ts-node 04-LinkedList/implemet/LinkedList.ts",
+    "bst": "ts-node 05-BST/implement/BSTree.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dongkq7/algo-code-ts.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dongkq7/algo-code-ts/issues"
+  },
+  "homepage": "https://github.com/dongkq7/algo-code-ts#readme"
+}
