@@ -45,50 +45,66 @@ class LinkedList<T> {
 
   // 向某个位置插入节点
   insert(position: number, value: T): boolean {
-    // 越界
+    // // 越界
+    // if (position < 0 || position > this.size) return false
+    // const newNode = new LinkedNode<T>(value)
+    // if (position === 0) {
+    //   // 节点想插入到首位，那么就让新节点的next指向当前head所指向的节点
+    //   // 再让head指向新节点即可
+    //   newNode.next = this.head
+    //   this.head = newNode
+    // } else {
+    //   // 插入到其他位置
+    //   // 那么就创建两个临时变量cur与pre分别记录想要插入位置的节点及该节点的前一个节点
+    //   // 让新节点的next指向该节点，再让该节点的前一个节点的next指向新节点即可
+    //   let cur = this.head
+    //   let pre: LinkedNode<T> | null = null
+    //   let i = 0
+    //   while(i++ < position) {
+    //     pre = cur!
+    //     cur = cur!.next
+    //   }
+    //   newNode.next = cur
+    //   pre!.next = newNode
+    // }
+    // this.size++
+    // return true
+    // 向某个位置插入节点
+
+    // 1.越界的判断
     if (position < 0 || position > this.size) return false
-    const newNode = new LinkedNode<T>(value)
+
+    // 2.根据value创建新的节点
+    const newNode = new LinkedNode(value)
+
+    // 3.判断是否需要插入头部
     if (position === 0) {
-      // 节点想插入到首位，那么就让新节点的next指向当前head所指向的节点
-      // 再让head指向新节点即可
       newNode.next = this.head
       this.head = newNode
     } else {
-      // 插入到其他位置
-      // 那么就创建两个临时变量cur与pre分别记录想要插入位置的节点及该节点的前一个节点
-      // 让新节点的next指向该节点，再让该节点的前一个节点的next指向新节点即可
-      let cur = this.head
-      let pre: LinkedNode<T> | null = null
-      let i = 0
-      while(i++ < position) {
-        pre = cur!
-        cur = cur!.next
-      }
-      newNode.next = cur
-      pre!.next = newNode
+      const previous = this.getNode(position - 1)
+      newNode.next = previous!.next
+      previous!.next = newNode
     }
     this.size++
+
     return true
+  
   }
 
   // 删除特定位置的节点
-  removeAt(position: number): T | null {
-    // 越界
+  removeAt(position: number) {
     if (position < 0 || position >= this.size) return null
-    let cur: LinkedNode<T> = this.head!
+    let current = this.head
     if (position === 0) {
-      this.head = this.head!.next
+      this.head = current?.next ?? null
     } else {
-      let pre: LinkedNode<T> | null = null
-      let i = 0
-      while(i++ < position) {
-        pre = cur
-        cur = cur.next!
-      }
-      pre!.next = cur.next
+      const preNode = this.getNode(position - 1)
+      current = preNode!.next
+      preNode!.next = preNode!.next?.next ?? null
     }
     this.size--
-    return cur.value
+    return current.value
   }
 
   indexOf(value: T): number {
