@@ -95,16 +95,16 @@ class LinkedList<T> {
   // 删除特定位置的节点
   removeAt(position: number) {
     if (position < 0 || position >= this.size) return null
-    let current = this.head
+    let cur = this.head
     if (position === 0) {
-      this.head = current?.next ?? null
+      this.head = cur?.next ?? null
     } else {
       const preNode = this.getNode(position - 1)
-      current = preNode!.next
+      cur = preNode!.next
       preNode!.next = preNode!.next?.next ?? null
     }
     this.size--
-    return current.value
+    return cur.value
   }
 
   indexOf(value: T): number {

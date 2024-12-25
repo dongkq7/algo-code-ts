@@ -7,7 +7,9 @@
     "stack": "ts-node 01-Stack/implement/test.ts",
     "queue": "ts-node 02-Queue/implement/test.ts",
     "linkedList": "ts-node 04-LinkedList/implemet/LinkedList.ts",
-    "bst": "ts-node 05-BST/implement/BSTree.ts"
+    "bst": "ts-node 05-BST/implement/BSTree.ts",
+    "h-linked": "ts-node 07-HigherLinkedList/implement/LinkedList.ts",
+    "c-linked": "ts-node 07-HigherLinkedList/implement/CircularLinkedList.ts"
   },
   "repository": {
     "type": "git",
