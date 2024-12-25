@@ -9,7 +9,8 @@
     "linkedList": "ts-node 04-LinkedList/implemet/LinkedList.ts",
     "bst": "ts-node 05-BST/implement/BSTree.ts",
     "h-linked": "ts-node 07-HigherLinkedList/implement/LinkedList.ts",
-    "c-linked": "ts-node 07-HigherLinkedList/implement/CircularLinkedList.ts"
+    "c-linked": "ts-node 07-HigherLinkedList/implement/CircularLinkedList.ts",
+    "d-linked": "ts-node 07-HigherLinkedList/implement/DoublyLinkedList.ts"
   },
   "repository": {
     "type": "git",
