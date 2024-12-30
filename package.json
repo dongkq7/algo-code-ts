@@ -11,7 +11,10 @@
     "h-linked": "ts-node 07-HigherLinkedList/implement/LinkedList.ts",
     "c-linked": "ts-node 07-HigherLinkedList/implement/CircularLinkedList.ts",
     "d-linked": "ts-node 07-HigherLinkedList/implement/DoublyLinkedList.ts",
-    "heap": "ts-node 08-Heap/implement/Heap.ts"
+    "heap": "ts-node 08-Heap/implement/Heap.ts",
+    "deque": "ts-node 09-HigherQueue/implement/ArrayDeque.ts",
+    "pQueue": "ts-node 09-HigherQueue/implement/PriorityQueue.ts",
+    "pQueue2": "ts-node 09-HigherQueue/implement/PriorityQueue2.ts"
   },
   "repository": {
     "type": "git",

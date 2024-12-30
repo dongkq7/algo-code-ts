@@ -1,10 +1,10 @@
-class Heap<T> {
+export default class Heap<T> {
   private data: T[] = []
   private length: number = 0
   // 是否是最大堆
   private isMaxHeap: boolean
 
-  constructor(arr: T[], isMaxHeap = true) {
+  constructor(arr: T[] = [], isMaxHeap = true) {
     this.isMaxHeap = isMaxHeap
     if (arr.length) {
       this.buildHeap(arr)
@@ -114,6 +114,10 @@ class Heap<T> {
   
   isEmpty() {
     return this.length === 0
+  }
+
+  size() {
+    return this.length
   }
 
   print() {
