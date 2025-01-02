@@ -14,7 +14,8 @@
     "heap": "ts-node 08-Heap/implement/Heap.ts",
     "deque": "ts-node 09-HigherQueue/implement/ArrayDeque.ts",
     "pQueue": "ts-node 09-HigherQueue/implement/PriorityQueue.ts",
-    "pQueue2": "ts-node 09-HigherQueue/implement/PriorityQueue2.ts"
+    "pQueue2": "ts-node 09-HigherQueue/implement/PriorityQueue2.ts",
+    "avl": "ts-node 10-AVLTree/implement/AVLTree.ts"
   },
   "repository": {
     "type": "git",
@@ -26,5 +27,8 @@
   "bugs": {
     "url": "https://github.com/dongkq7/algo-code-ts/issues"
   },
-  "homepage": "https://github.com/dongkq7/algo-code-ts#readme"
+  "homepage": "https://github.com/dongkq7/algo-code-ts#readme",
+  "dependencies": {
+    "hy-algokit": "^1.4.0"
+  }
 }
