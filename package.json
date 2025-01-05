@@ -15,7 +15,13 @@
     "deque": "ts-node 09-HigherQueue/implement/ArrayDeque.ts",
     "pQueue": "ts-node 09-HigherQueue/implement/PriorityQueue.ts",
     "pQueue2": "ts-node 09-HigherQueue/implement/PriorityQueue2.ts",
-    "avl": "ts-node 10-AVLTree/implement/AVLTree.ts"
+    "avl": "ts-node 10-AVLTree/implement/AVLTree.ts",
+    "s-b": "ts-node 11-Sort/01bubbleSort.ts",
+    "s-s": "ts-node 11-Sort/02selectionSort.ts",
+    "s-i": "ts-node 11-Sort/03insertionSort.ts",
+    "s-m": "ts-node 11-Sort/04mergeSort.ts",
+    "s-q": "ts-node 11-Sort/05quickSort.ts",
+    "s-h": "ts-node 11-Sort/06heapSort.ts"
   },
   "repository": {
     "type": "git",

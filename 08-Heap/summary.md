@@ -127,7 +127,9 @@ console.log(heap.data)
 
 #### extract
 
-如果没有元素直接返回undefine，如果有元素那么需要将length--然后shift或pop即可。其他情况就要考虑堆重构了。
+- 如果没有元素直接返回undefined
+- 如果有一个元素那么需要将length--然后shift或pop即可。
+- 其他情况就要考虑堆重构了。
 
 删除操作也需要考虑删除元素后的堆重构，这种向下替换元素的策略叫作下滤：
 
