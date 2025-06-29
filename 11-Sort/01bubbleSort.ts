@@ -1,6 +1,7 @@
 import { testSort, swap } from './utils'
 function bubbleSort(arr: number[]): number[] {
   const n = arr.length
+  if (n < 2) return arr
   // 表示进行的第几轮
   for(let i = 0; i < n; i++) {
     let swapped = false

@@ -1,4 +1,4 @@
-import { testSort } from "./utils"
+import { testSort, swap } from "./utils"
 
 function insertionSort(arr: number[]): number[] {
   const n = arr.length
@@ -17,4 +17,16 @@ function insertionSort(arr: number[]): number[] {
   return arr
 }
 
-testSort(insertionSort)
+
+function insertionSort2(arr: number[]): number[] {
+  const n = arr.length
+  for(let i = 1; i < n; i++) {
+    for(let j = i - 1; j >= 0 && arr[j] > arr[j+1]; j--) {
+      swap(arr, j, j+1)
+    }
+  }
+  return arr
+}
+
+// testSort(insertionSort)
+testSort(insertionSort2)
