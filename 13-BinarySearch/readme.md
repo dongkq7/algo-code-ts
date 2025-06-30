@@ -57,6 +57,7 @@ const mid = left + ((right - left) >> 1)
 ```
 
 - 更推荐使用右移操作来进行，右移比除法要快
+- 右移1位相当于除以2：(right - left) >> 1 等价于 Math.floor((right - left) / 2)，结果总是整数：位运算的结果始终是整数，不会产生小数部
 
 # 扩展问题
 

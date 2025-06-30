@@ -381,147 +381,510 @@ function insertionSort2(arr: number[]): number[] {
 
 # 4、归并排序
 
-归并排序进本思想是将待排序的数组分成若干个子数组，然后将相邻的子数组归并成一个有序数组，最后再将这些有序数组归并成一个整体有序的数组。
+# 前置知识
 
-## 基本思路
+## 递归结果汇总的过程
 
-![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1735887324618-71d87386-138a-4780-beab-8c43935224ed.png)
-
-归并排序是一种基于分治思想的排序算法，其基本思路可以分为三个步骤：
-
-1. 分解
-
-1. 如果待排序数组长度为1，认为这个数组已经有序直接返回
-2. 否则，将待排序数组分成两个子数组，分别对这两个子数组进行递归分解，直到数组长度为1
-
-1. 合并：比较两个子数组中的元素大小并合并成一个新数组
-
-1. 可以设置两个指针，分别指向两个子数组的开始位置，比较它们的大小放入到有序数组中。较小数据的数组指针+1，较大数据数组指针不变，然后循环比较。
-2. 如果其中一个子数组已经遍历完成，就将另一个数组剩余部分直接插入到有序数组中即可
-3. 最后返回这个有序数组
-
-![img](https://cdn.nlark.com/yuque/0/2025/gif/22253064/1735890119446-0551954c-78ea-47be-aaaf-619ee05570a4.gif)
-
-## 实现
+比如，使用递归去查找数组中的最大值，就有了下面的代码：
 
 ```typescript
-function mergeSort(arr: number[]): number[] {
-  if (arr.length <= 1) {
+function findMax(arr: number[], left: number, right: number) {
+  // 边界处理：如果这个范围只有一个数，那么直接返回
+  if (left === right) {
+    return arr[left]
+  }
+  // 否则分成左右两部分，分别求左侧的最大值与右侧的最大值
+  const mid = left + ((right - left) >> 1)
+  const leftMax = findMax(arr, left, mid)
+  const rightMax = findMax(arr, mid + 1, right)
+  return Math.max(leftMax, rightMax)
+}
+
+const arr = [1,2,3,4,5,6,7]
+console.log(findMax(arr, 0 , arr.length-1))
+```
+
+**把递归函数的调用过程进行拆分得到下图：**
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751187716094-c0d6e082-8a9e-4b81-b430-d5779ec9cf3c.png)
+
+递归过程类似于一个多叉树，可以发现，**每个节点的结果依赖其下所有子点的结果：**
+
+- f(0,6)先压入栈，然后它需要f(0,3)和f(4,6)，依次压栈
+- 然后f(0,3)需要f(0,1)与f(2,3)的结果，依次压入栈
+- 依次类推，直到计算到最下面的节点返回结果后，然后将结果汇总之后，依次向上返回
+- 此时f(0,3)拿到了结果了，然后出栈
+- 再继续去计算f(4,6)，f(4,6)依赖f(4,5)与f(5,6)于是压栈进行计算，然后f(4,5)需要f(4,4)与f(5,5)
+- ......
+
+## 递归行为时间复杂度估算
+
+通过master公式来计算：
+
+```
+**T(N) = a \* T(N/b) + O(N^d)**
+```
+
+这个公式是什么意思呢？
+
+- T(N)指的是，**母问题的数据量是N**
+- T(N/b)指的是**子问题的规模**，也就是说求母问题的过程，每次使用的子问题的规模是等量的，都是N/b的规模
+- a指的是**子问题的调用次数**
+- O(N^d)指的是除去调用之外**剩下的过程的时间复杂度**
+
+这样一类的递归都可以用master公式来求解时间复杂度
+
+**在求解时间复杂度的时候****只看一层调用行为****细节即可。**
+
+对于上面的函数来说：
+
+- 母问题规模是N
+- 在调取子问题时都是等量的，规模都是N/2
+- 并且子问题调用了2次
+- 除了调用过程外，其他过程的时间复杂度是O(1)（直接返回、对比最大值，都是常数级别的）
+
+所以对于上述函数来说，a=2 、b=2 、d = 0，它的master公式为：T(N) = 2 * T(N/2) + O(1)
+
+需要注意，要使用master公式求解，子问题规模必须是等量的。对于上述函数来说比如分了两个子问题，第一个子问题求的是数组三分之一长度中的最大值，第二个子问题求的是数组三分之二长度的子问题，两个子问题规模不一样，这样就不能用master公式了。
+
+至此，a b d的值就确定了，比如T(N) = 2 * T(N/2) + O(1)，那么它对应的时间复杂度是多少呢？计算方式如下：
+
+- 如果logba < d，那么时间复杂度为O(Nd)
+- 如果logba > d，那么时间复杂度为O(Nlogba)
+- 如果logba = d，那么时间复杂度为O(Nd * logN)
+
+对于上述master公式为，因为log22 = 1 > 0，所以它的时间复杂度为O(N)，也就意味着它的时间复杂度等效与从左到右遍历一遍数组求最大值
+
+# 归并排序核心思想
+
+归并排序，英语 Merge Sort，这是一种基于 **分治法** 的排序算法。它的基本思想是**将一个大的数组分成若干个小的数组，****直到每个小数组只有一个元素为止****。然后再将这些小数组合并成一个有序的数组**。
+
+归并排序工作流程：
+
+1. **分割**：将原始数组分成两个部分，递归的将每一个部分的数组继续分割，直到每个部分只包含一个元素。
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751195864967-c0323484-7956-4163-a177-270fe71c6a78.png)
+
+1. **合并**：将分割好的部分，两两合并，合并的时候保持顺序，最终合并成一个有序的数组。
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751195864990-e8e1e190-5523-43b2-b9bd-9c5e06f52434.png)
+
+“拆分”非常好理解，每次砍一半。
+
+关键是“合并”，究竟是如何合并成有序的？
+
+# 归并排序合并过程
+
+那么这里以最后一步为例：`[4, 5, 7, 8]` 和`[1, 2, 3, 6]` 进行合并
+
+1. **定义两个指针，第一个指向第一个有序数组的第一个元素；第二个指向第二个有序数组的第一个元素。****需要创建一个临时数组，临时数组的长度 = 两个数组长度之和**。两个有序数组的第一个元素进行比较，谁小，谁就放入到临时数组中，放入临时数组之后，对应的索引右移：
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751195865015-3a417ed0-4901-4558-85fd-5fcf7a8f1a05.png)
+
+
+
+1. 继续 i 和 j 对应的元素进行比较，4 和 2 比较，仍然是 2 比较小，将 2 放入到 temp 数组的第二个元素的位置。接下来 j 继续往右边移动：
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751195865095-8fe44689-c98a-4ae6-a0c5-7df6d22db71d.png)
+
+
+
+1. 继续 i 和 j 对应的元素进行比较，4 和 3 比较，仍然是 3 比较小，将 3 放入到 temp 数组的第三个元素的位置。接下来 j 继续往右边移动：
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751195865128-ba32ae18-02c4-43d1-ac1d-3f5a6339cae7.png)
+
+
+
+1. 继续 i 和 j 对应的元素进行比较，这一次就是 4 和 6 进行比较，这一次是 4 是比较小，将 4 放入到 temp 数组的第四个元素的位置，然后i 继续往右边移动：
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751195865527-1777ec3e-48da-4c82-9f5a-b0361b273d57.png)
+
+
+
+1. 继续 i 和 j 对应的元素进行比较，这一次是 5 和 6 进行比较，这一次是 5 是比较小，将 5 放入到 temp 数组的第五个元素的位置，i 继续往右边移动：
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751195865539-0b9adf09-7c25-4067-8d5a-0148038eccb8.png)
+
+
+
+1. 接下来继续上面的操作，这一次是 7 和 6 进行比较，6 比较小，将 6 放入到 temp 数组的第六个元素的位置，这一次应该是 j 往右边移动。但是这一次 j 已经无法往右边移动。说明这个有序数组所有的元素已经遍历结束。
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751195865569-ac02c1c6-c18f-467d-8c15-961e342d82b6.png)
+
+
+
+1. 接下来只需要将第一个有序数组的剩余元素，全部放入到 temp 数组里面即可：
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751195865570-0b938f5a-c99f-46bf-a5e7-5ed5ee72dfcb.png)
+
+1. **最后，再将 temp 这个临时数组里面所有的元素拷贝到原数组中，合并结束**
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751195865623-13c58b57-6f0b-40fc-bc27-caa4197c550e.png)
+
+
+
+# 归并排序代码实现
+
+## 方式一（好理解，但性能不如方式二）
+
+```javascript
+// 这个方法负责拆分
+function mergeSort(arr: number[]) {
+  // 如果数组长度小于2，说明拆分完毕， 则直接返回
+  if (arr.length < 2) {
     return arr
   }
-  // 找到中间位置进行分割
-  const mid = Math.floor(arr.length / 2)
-  const leftArr = arr.slice(0, mid)
-  const rightArr = arr.slice(mid)
+  // 如果数组长度大于2，则将数组分为两部分
+  const mid = arr.length >> 1
+  // 将左侧部分接着拆分
+  const left = mergeSort(arr.slice(0, mid))
+  // 将右侧部分接着拆分
+  const right = mergeSort(arr.slice(mid))
+  // 拆分好了，将左侧和右侧部分合并，并返回合并好的数组
+  return merge(left, right)
+}
 
-  // 进行递归分割
-  const newLeftArr = mergeSort(leftArr)
-  const newRightArr = mergeSort(rightArr)
+// 这个方法负责合并
+function merge(left: number[], right: number[]) {
+  // 创建一个空数组，用于存储合并后的结果
+  let result = []
+  // 创建两个指针，分别指向左侧和右侧数组的起始位置
+  let leftIndex = 0
+  let rightIndex = 0
 
-  // 声明一个新的数组存放排好序的数据
-  const newArr: number[] = []
-  // 进行合并排序
-  let i = 0
-  let j = 0
-  while (i < newLeftArr.length && j < newRightArr.length) {
-    if (newLeftArr[i] <= newRightArr[j]) {
-      newArr.push(newLeftArr[i])
-      i++
+  // 当两个指针都小于各自数组的长度时，比较两个指针所指向的元素，将较小的元素添加到结果数组中
+  // 注意这里是小于，因为有一侧数组遍历完后还会进行加一，所以退出循环时index与length相等
+  while(leftIndex < left.length && rightIndex < right.length) {
+    if (left[leftIndex] <= right[rightIndex]) {
+      result.push(left[leftIndex++])
     } else {
-      newArr.push(newRightArr[j])
-      j++
+      result.push(right[rightIndex++])
     }
   }
-  // 将剩余的数据放入新数组中
-  if (i < newLeftArr.length) {
-    newArr.push(...newLeftArr.slice(i))
-  } 
-  if (j < newRightArr.length) {
-    newArr.push(...newRightArr.slice(j))
+
+  // 来到这里说明左侧或者右侧的数组已经遍历完了，那么需要将另一部分数组中的数直接拼接到结果数组中
+  // 如果左侧数组没有遍历完，则将左侧数组中剩余的数拼接到结果数组中
+  if (leftIndex < left.length) {
+    result = result.concat(left.slice(leftIndex))
   }
-  // 将合并后的数组进行返回
-  return newArr
+  // 如果右侧数组没有遍历完，则将右侧数组中剩余的数拼接到结果数组中
+  if (rightIndex < right.length) {
+    result = result.concat(right.slice(rightIndex))
+  }
+  // 返回合并好的数组
+  return result
 }
+
+const arr = [38, 27, 43, 3, 9, 82, 10]
+const sortedArr = mergeSort(arr)
+console.log(sortedArr)
 ```
 
-以`[7, 3, 2, 16, 24, 4, 11, 9]`为例，在归并排序中的执行过程如下：
+- concat与slice都会产生额外的空间开销
 
-**第一次分割**
-
-- 数组被分割为`[7,3,2,16]`和`[24,4,11,9]`
+## 方式二
 
 ```typescript
-const leftArr = [7, 3, 2, 16]
-const rightArr = [24, 4, 11, 9]
+function mergeSort(arr: number[]) {
+  if (arr.length < 2) {
+    return
+  }
+  // 开始排序
+  process(arr, 0, arr.length - 1)
+}
+
+// 递归调用process方法，对数组进行排序
+function process(arr: number[], L: number, R: number) {
+  // 如果左边界等于右边界，说明数组只有一个元素，直接返回
+  if (L === R) {
+    return
+  }
+  // 如果左边界不等于右边界，说明数组有多个元素，需要进行排序
+  const mid = L + ((R - L) >> 1)
+  // 对左半部分进行排序
+  process(arr, L, mid)
+  // 对右半部分进行排序
+  process(arr, mid + 1, R)
+  // 合并左右两部分
+  merge(arr, L, mid, R)
+}
+
+function merge(arr: number[], L: number, M: number, R: number) {
+  // 创建一个辅助数组，用于存储合并后的结果
+  const help = new Array(R - L + 1)
+  let i = 0
+  // 创建两个指针，分别指向左侧和右侧数组的起始位置
+  let leftIndex = L
+  let rightIndex = M + 1
+  // 当两个指针都小于各自数组的长度时，比较两个指针所指向的元素，将较小的元素添加到结果数组中
+  while (leftIndex <= M && rightIndex <= R) {
+    help[i++] = arr[leftIndex] <= arr[rightIndex] ? arr[leftIndex++] : arr[rightIndex++]
+  }
+
+  // 如果左侧数组没有遍历完，则将左侧数组中剩余的数拼接到结果数组中
+  while (leftIndex <= M) {
+    help[i++] = arr[leftIndex++]
+  }
+
+  // 如果右侧数组没有遍历完，则将右侧数组中剩余的数拼接到结果数组中
+  while (rightIndex <= R) {
+    help[i++] = arr[rightIndex++]
+  }
+
+  // 将辅助数组中的元素复制回原数组
+  for (let i = 0; i < help.length; i++) {
+    arr[L + i] = help[i]
+  }
+}
+
+const arr = [38, 27, 43, 3, 9, 82, 10]
+mergeSort(arr)
+console.log(arr)
 ```
 
-**递归分割左半部分[7,3,2,16]**
+- help数组创建时最好申请固定长度，免去额外的空间申请开销
+- help[i++]方式要比help.push更好（即使申请了固定长度的空间）：
 
-- 数组被分为[7,3]和[2,16]
+即使数组有足够空间，push() 仍然需要：
 
-```typescript
-const newLeftArr = mergeSort([7,3])
-const newRightArr = mergeSort([2,16])
-```
+- 长度检查：检查当前长度是否小于容量
+- 长度更新：更新数组的 length 属性
+- 函数调用开销：调用 push 方法本身的开销
 
-**递归分割[7,3]**
+# 归并排序时间复杂度
 
-被分割为[7]和[3]，由于此时数组长度为1，所以直接被返回
+归并排序使用了递归：
 
-```typescript
-const newLeftArr = mergeSort([7]) // 返回[7]
-const newRightArr = mergeSort([3]) // 返回[3]
-```
+- 母问题的数据规模为N
+- 子问题的数据规模为N/2
+- 一轮子问题的调用次数为2
+- 除了子问题调用，其他操作的时间复杂度为O(N)：因为需要对数组进行遍历进行合并
 
-**合并[7]和[3]**
+所以其对应的master公式为：**T(N) = 2\* T(N/2) + O(N)，所以a = 2 b = 2 d = 1**
 
-得到新数组newArr = [3, 7]并返回
+**由于log**b**a = d，所以时间复杂度为O(N**d *** logN) = O(NlogN)**
 
-**递归分割[2,16]**
-
-被分割为[2]和[16]，由于此时数组长度为1，所以直接被返回
-
-```typescript
-const newLeftArr = mergeSort([2]) // 返回[2]
-const newRightArr = mergeSort([16]) // 返回[16]
-```
-
-**合并[2]和[16]**
-
-得到新数组newArr = [2, 16]并返回
-
-**至此，递归分割的[7,3]和[2,16]已拿到结果，进行合并**
-
-```typescript
-const newLeftArr = mergeSort([7,3]) // [3,7]
-const newRightArr = mergeSort([2,16]) // [2,16]
-```
-
-- 得到新数组[2,3,7,16]并返回
-
-**递归分割右半部分[24,4,11,9]**
-
-- 被分割为[24,4]和[11,9]
-
-```typescript
-const newLeftArr = mergeSort([24,4])
-const newRightArr = mergeSort([11,9])
-```
-
-**然后去递归分割[24,4]，得到[24]与[4]，接着[24]与[4]进行合并得到新数组[4,24]并返回**
-
-**接着递归分割[11,9]....**
-
-**递归分割的右半部分也拿到了结果，最后进行合并输出拿到最终结果**
-
-## 时间复杂度
-
-归并排序的时间复杂度为O(nlogn)
+时间复杂度也可以这样看：
 
 - 分解过程通过递归将数组不断分成两版，直到每个子数组只有一个元素位置，因此分解层数是logn
 - 合并过程是在每一层去遍历整个数组，因此每一层的合并操作为O(n)
 
 因此总时间复杂度为O(nlogn)
+
+# 归并排序的额外空间复杂度
+
+由于每次在合并时申请长度为N的空间，合并完就被释放了。所以最多只需要N的空间。**额外空间复杂度为O(N)。**
+
+# 归并排序的稳定性
+
+归并排序是一种**稳定排序**。
+
+如果遇到相等的元素，是优先将左边数组的元素放入临时数组。
+
+```javascript
+if (left[leftIndex] <= right[rightIndex]) {
+  // 说明左边的元素更小
+  // 将左边元素放入到临时数组里面
+  result.push(left[leftIndex]);
+  leftIndex++;
+} else {
+  // 说明右边元素更小
+  // 将右边元素放入到临时数组里面
+  result.push(right[rightIndex++]);
+}
+```
+
+关键就是 `left[leftIndex] <= right[rightIndex]`，因此在左右数组元素相等的情况下，优先放入左边数组的元素。
+
+假设修改一下 `left[leftIndex] < right[rightIndex]`，这么一改，就变成优先取右边数组的元素放入临时数组，就会导致不稳定。
+
+
+
+# 对比选择排序、冒泡排序
+
+选择排序与冒泡排序的时间复杂度为O(N2)，是因为**这两种排序算法浪费了大量的比较行为。**
+
+- 它们在比较一轮后只能搞定一个数
+
+而归并排序没有浪费大量的比较行为：
+
+- 左侧部分有序、右侧部分也是有序的，左侧与右侧的去比，比较行为信息被保留了，变成了整体有序的部分，然后再由左侧更大部分的有序数组与右侧更大部分的有序数组去比
+- 也就是说每次的比较行为变成了有序的部分，没有被浪费
+
+
+
+# 归并排序题目扩展
+
+## 小和问题
+
+在一个数组中，每一个数左边比当前数小的数进行累加，叫做这个数组的小和。
+
+比如，数组[1,3,4,2,5]：
+
+- 比1小的数左侧没有，**对于1来说，小和为0**
+- 比3小的数左侧为**1，对于3来说，小和为1**
+- 比4小的数左侧为**1、3，对于4来说，小和为1+3=4**
+- 比2小的数左侧为**1，对于2来说，小和为1**
+- 比5小的数左侧为**1，3，4，2，对于5来说，小和为1 + 3 + 4 + 2 = 10**
+
+那么整个数组的小和为`0 + 1 + 4 + 1 + 10 = 16`
+
+这个问题当然可以通过暴力的方式来计算：从头到尾去遍历，每遍历一个数都要把其前面的数再遍历一遍。那么这种方式的时间复杂度是O(N2)**，有没有更好的方式呢？**
+
+**解题关键就在于，转换一下思路：所谓求左边比这个数小的和，等同于在右边有多少个数比这个数大，那么就产生多少个这个数的小和，**还是拿[1,3,4,2,5]来看：
+
+- 对于1来说，右侧有4个数比1大，那么产生的小和为4*1 = 4
+- 对于3来说，右侧有2个数比3大，那么产生的小和为3*2=6
+- 对于4来说，右侧有1个数比4大，那么产生的小和为4
+- 对于2来说，右侧有有1个数比2大，那么产生的小和为2
+
+所以整个数组的小和为 4 + 6 + 4 + 2 = 16，同看左侧比该数小的所求出来的是一样的。那么此时就可以将该问题转换为归并排序来求解了。
+
+【注意】**为什么还需要通过排序来求解这道题呢？**
+
+问题的关键转换成了，看右组有多少个数比左组这个数a大，就产生多少个这个关于a的小和。
+
+所以只有经过排序才能快速通过O(1)的复杂度来计算出右组有多少个数比这个数大，比如
+
+左组为：12346 右组为27889，比如要看右组有几个数比1大，正因为经过了排序，所以能够通过右组的下标来快速计算出有多少个数比1大，**右组的第一个数都比1大，所以肯定后面的数都比1大**。如果右组是乱序的，还需要去依次遍历。**所以排序过程是不能省的。**
+
+还需要关注的一点是，和普通的归并排序不一样的一点是，**在进行合并的时候如果左组的这个数与右组的数相同的时候，一定要先拷贝右组的数，然后右组的索引向后移，因为只有这样才能知道右组到底有几个数比左组的这个数大：**
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751212775129-6f967650-96aa-4b4c-a05f-677e18152d7f.png)
+
+比如左组数为1 1 2 3 4，右组数为1 1 2 2 7 8，左侧1此时与右侧1相等。那么需要先将右侧1拷贝到数组中，然后右侧的指针向后移。然后左侧1与右侧1又相等了，接着将右侧1拷贝进去，指针后移。接着左侧1严格小于右侧2了，于是开始产生小和了，又因为数组是有序的，所以会得到右组有4个数比1大，此时产生4个1的小和。
+
+然后将左侧1放入数组中，指针后移。移动后左侧为1，小于右侧的2，所以又会产生4个1的小和。
+
+依次类推...
+
+```typescript
+function smallSum(arr: number[]) {
+  // 就一个数，就没有啥可比的了，那么小和为0
+  if (arr.length < 2) {
+    return 0
+  }
+  return process(arr, 0, arr.length - 1)
+}
+
+function process(arr: number[], L: number, R: number) {
+  if (L === R) {
+    return 0
+  }
+  const mid = L + ((R - L) >> 1)
+  // 左半部分的小和 + 右半部分的小和 + 合并时产生的小和
+  return process(arr, L, mid) + process(arr, mid + 1, R) + merge(arr, L, mid, R)
+}
+
+function merge(arr: number[], L: number, M: number , R: number) {
+  // 创建一个辅助数组，用于存储合并后的结果
+  const help = new Array(R - L + 1)
+  let i = 0
+  // 记录小和
+  let result = 0
+  // 创建两个指针，分别指向左侧和右侧数组的起始位置
+  let leftIndex = L
+  let rightIndex = M + 1
+
+  while(leftIndex <= M && rightIndex <= R) {
+    // 如果左侧的数小于右侧的数，则计算小和
+    // 小和的计算方式是：右侧数组中大于当前左侧数的个数 * 当前左侧数
+    // 因为右侧数组是已经排序好的，所以大于当前左侧数的个数就是R - rightIndex + 1
+    // 例如：左侧数为2，右侧数组为[3,4,5]，则产生的小和为2 * 3 = 6
+    result += arr[leftIndex] < arr[rightIndex] ? (R - rightIndex + 1) * arr[leftIndex] : 0
+    // 只有左组数严格小于右组数的时候才将左组数放入到help数组中，否则将右组数放入到help数组中
+    help[i++] = arr[leftIndex] < arr[rightIndex] ? arr[leftIndex++] : arr[rightIndex++]
+  }
+
+  while(leftIndex <= M) {
+    help[i++] = arr[leftIndex++]
+  }
+
+  while(rightIndex <= R) {
+    help[i++] = arr[rightIndex++]
+  }
+  for(let i = 0; i < help.length; i++) {
+    arr[L+i] = help[i]
+  }
+  return result
+}
+
+console.log(smallSum([1,3,4,2,5]))
+```
+
+
+
+## 逆序对问题
+
+在一个数组中，左边的数如果比右边的数大， 则这两个数构成一个逆序对，打印所有的逆序对。
+
+这道题的逻辑思路与小和问题一样，只不过小和问题求的是右边的数有多少比左边的数大，**逆序对求的是右边的数有多少比左边的数要小**
+
+https://leetcode.cn/problems/shu-zu-zhong-de-ni-xu-dui-lcof/description/
+
+解题思路如图
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751257271127-0ec7b733-f64d-43e7-a7ab-da3fb416279b.png)
+
+解题关键是：**将问题转换成，左边有多少数比右组当前的数要大，有几个就产生几个关于这个数的逆序对**
+
+- **左组数按照从小到大的顺序排列**，分别通过索引从左组数的开头与右组数的开头去对比大小，如果右组的当前数比左组的当前数要小，那么说明目前左组有(mid - leftIndex + 1)个数比当前数要大（因为左组是按照从小到大的顺序排列的），也就是说会产生(mid - leftIndex + 1)个逆序对
+- 对比完这轮后，将右组的这个比较小的数放到help中，再把左组较大的数依次放到help中
+
+![img](https://cdn.nlark.com/yuque/0/2025/png/22253064/1751259416854-808ef09f-a0d5-4283-90dd-7ef2e5980f84.png)
+
+- 绿色背景为递归merge与最终merge时产生的逆序对数量
+
+```typescript
+/**
+ * 输入record = [9,7,5,4,6]
+ * 输出 8
+ * 解释：交易中的逆序对为(9,7),(9,5),(9,4),(9,6),(7,5),(7,4),(7,6),(5,4)
+ */
+function reversePairs(record: number[]): number {
+  if (record.length < 2) {
+    return 0
+  }
+  return process(record, 0, record.length-1)
+}
+
+function process(record: number[], L: number, R: number) {
+  if (L === R) {
+    return 0
+  }
+  const mid = L + ((R - L) >> 1)
+  return process(record, L, mid) + process(record, mid+1, R) + merge(record, L, mid, R)
+}
+
+function merge(record: number[], L: number, M:number, R:number) {
+  const help = new Array(R - L + 1)
+  let i = 0
+  let total = 0
+  // 左组数最左侧索引
+  let leftIndex = L
+  // 右组数最左侧索引
+  let rightIndex = M + 1
+
+  while(leftIndex <= M && rightIndex <= R) {
+    total +=  record[rightIndex] < record[leftIndex] ? (M - leftIndex + 1) : 0
+    help[i++] = record[rightIndex] < record[leftIndex]   ? record[rightIndex++] : record[leftIndex++]
+  }
+
+  while(leftIndex <= M) {
+    help[i++] = record[leftIndex++]
+  }
+  
+  while(rightIndex <= R) {
+    help[i++] = record[rightIndex++]
+  }
+  for(let i = 0; i < help.length; i++) {
+    record[L+i] = help[i]
+  }
+  return total
+}
+
+console.log(reversePairs([9,7,5,4,6]))
+```
 
 
 
