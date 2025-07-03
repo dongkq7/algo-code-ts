@@ -1,9 +1,11 @@
+import { testSort, swap } from './utils'
+
 // 快速排序
 function quickSort(arr: number[]) {
   if (arr.length < 2) {
-    return
+    return arr
   }
-  process(arr, 0, arr.length - 1)
+  return process(arr, 0, arr.length - 1)
 }
 
 function process(arr: number[], left: number, right: number) {
@@ -19,6 +21,7 @@ function process(arr: number[], left: number, right: number) {
     // 递归处理右半你分
     process(arr, p[1] + 1, right)
   }
+  return arr
 }
 
 function partition(arr: number[], left: number, right: number) {
@@ -30,8 +33,8 @@ function partition(arr: number[], left: number, right: number) {
   // 取数组最后一个位置的数作为基准值
   const pivot = arr[right]
   // left指针没有到达more区域时进行循环遍历
-  while(left < more) {
-    if(arr[left] < pivot) {
+  while (left < more) {
+    if (arr[left] < pivot) {
       // 小于基准值，则与less区域边界的下一个位置的数交换
       // 并且less区域向后扩一位，left指向下一个数
       swap(arr, ++less, left++)
@@ -51,12 +54,7 @@ function partition(arr: number[], left: number, right: number) {
   return [less + 1, more]
 }
 
-function swap(arr: number[], i: number, j: number) {
-  let temp = arr[i]
-  arr[i] = arr[j]
-  arr[j] = temp
-}
-
-const arr = [2,8,7,3,0,5,9,5]
-quickSort(arr)
-console.log(arr)
+// const arr = [2, 8, 7, 3, 0, 5, 9, 5]
+// quickSort(arr)
+// console.log(arr)
+testSort(quickSort)

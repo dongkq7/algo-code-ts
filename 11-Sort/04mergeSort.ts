@@ -1,4 +1,4 @@
-import { testSort } from "./utils"
+import { testSort } from './utils'
 
 // function mergeSort(arr: number[]): number[] {
 //   if (arr.length <= 1) {
@@ -30,7 +30,7 @@ import { testSort } from "./utils"
 //   // 将剩余的数据放入新数组中
 //   if (i < newLeftArr.length) {
 //     newArr.push(...newLeftArr.slice(i))
-//   } 
+//   }
 //   if (j < newRightArr.length) {
 //     newArr.push(...newRightArr.slice(j))
 //   }
@@ -42,10 +42,10 @@ import { testSort } from "./utils"
 
 function mergeSort(arr: number[]) {
   if (arr.length < 2) {
-    return
+    return arr
   }
   // 开始排序
-  process(arr, 0, arr.length - 1)
+  return process(arr, 0, arr.length - 1)
 }
 
 // 递归调用process方法，对数组进行排序
@@ -62,6 +62,7 @@ function process(arr: number[], L: number, R: number) {
   process(arr, mid + 1, R)
   // 合并左右两部分
   merge(arr, L, mid, R)
+  return arr
 }
 
 function merge(arr: number[], L: number, M: number, R: number) {
@@ -90,8 +91,11 @@ function merge(arr: number[], L: number, M: number, R: number) {
   for (let i = 0; i < help.length; i++) {
     arr[L + i] = help[i]
   }
+  return arr
 }
 
-const arr = [38, 27, 43, 3, 9, 82, 10]
-mergeSort(arr)
-console.log(arr)
+// const arr = [38, 27, 43, 3, 9, 82, 10]
+// mergeSort(arr)
+// console.log(arr)
+
+testSort(mergeSort)

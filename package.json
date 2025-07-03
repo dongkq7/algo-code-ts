@@ -22,6 +22,7 @@
     "s-m": "ts-node 11-Sort/04mergeSort.ts",
     "s-q": "ts-node 11-Sort/05quickSort.ts",
     "s-h": "ts-node 11-Sort/06heapSort.ts",
+    "s-r": "ts-node 11-Sort/06radixSort.ts",
     "feibo": "ts-node 12-DP/01Feibo/index.ts",
     "climb": "ts-node 12-DP/02Climb/index.ts",
     "maxP": "ts-node 12-DP/03MaxProfit/index.ts",
