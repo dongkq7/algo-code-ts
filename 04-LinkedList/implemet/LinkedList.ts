@@ -17,10 +17,10 @@ class LinkedList<T> {
 
   // 根据索引获取该位置节点
   private getNode(position: number): LinkedNode<T> | null {
-    let cur: LinkedNode<T> = this.head!
+    let cur: LinkedNode<T> = this.head
     let i = 0
-    while(i++ < position && cur) {
-      cur = cur.next!
+    while (i++ < position && cur) {
+      cur = cur.next
     }
     return cur
   }
@@ -35,8 +35,8 @@ class LinkedList<T> {
       // 如果链表不为空，那么就在链表最后追加该节点（让链表的最后一个节点的next指向这个新节点）
       // 创建一个临时变量cur指向head，依次往后走，直到cur.next 为空则表示走到了最后一个节点的位置
       let cur = this.head
-      while(cur.next) {
-        cur = cur.next!
+      while (cur.next) {
+        cur = cur.next
       }
       cur.next = newNode
     }
@@ -89,7 +89,6 @@ class LinkedList<T> {
     this.size++
 
     return true
-  
   }
 
   // 删除特定位置的节点
@@ -110,9 +109,9 @@ class LinkedList<T> {
   indexOf(value: T): number {
     let cur = this.head
     let i = 0
-    while(cur) {
+    while (cur) {
       if (cur.value === value) return i
-      i ++
+      i++
       cur = cur.next
     }
     return -1
@@ -136,19 +135,77 @@ class LinkedList<T> {
     return this.getNode(position)?.value ?? null
   }
 
+  // 反转链表
+  reverse() {
+    if (!this.head || !this.head.next) return
+    let cur = this.head
+    let pre: LinkedNode<T> | null = null
+    let next: LinkedNode<T> | null = null
+
+    while (cur) {
+      next = cur.next
+      cur.next = pre
+      pre = cur
+      cur = next
+    }
+
+    this.head = pre
+  }
+
+  // 置换链表
+  swap(index1: number, index2: number) {
+    // 边界条件判断
+    if (
+      index1 === index2 ||
+      index1 < 0 ||
+      index1 >= this.size ||
+      index2 < 0 ||
+      index2 >= this.size
+    ) {
+      return false
+    }
+
+    let cur = this.head
+    let i = 0
+    let node1: LinkedNode<T> | null = null
+    let node2: LinkedNode<T> | null = null
+
+    while (cur) {
+      if (index1 === i) {
+        node1 = cur
+      }
+      if (index2 === i) {
+        node2 = cur
+      }
+      // 都找到了，跳出循环
+      if (node1 && node2) {
+        break
+      }
+      i++
+      cur = cur.next
+    }
+
+    // 有可能是遍历链表结束跳出了循环，所以这里也要判断一下
+    if (node1 && node2) {
+      let temp = node1.value
+      node1.value = node2.value
+      node2.value = temp
+      return true
+    }
+    return false
+  }
+
   // 遍历输出链表中的内容
-  traverse(){
-    // 链表为空不进行遍历
-    if(!this.head) return
+  traverse() {
     // 临时变量
     let cur = this.head
     // 存放遍历到的节点
-    const values : T[] = []
-    while(cur) {
+    const values: T[] = []
+    while (cur) {
       values.push(cur.value)
-      cur = cur.next!
+      cur = cur.next
     }
-    console.log(values.join('->'))
+    console.log(values.join('->') + '->null')
   }
 
   isEmpty() {
@@ -160,21 +217,23 @@ const linkedList = new LinkedList<string>()
 linkedList.append('111')
 linkedList.append('222')
 linkedList.append('333')
+// linkedList.reverse()
+linkedList.swap(1, 2)
 linkedList.traverse()
-linkedList.insert(0, '000')
-linkedList.insert(4, '789')
-linkedList.traverse()
-console.log(linkedList.removeAt(2))
-linkedList.traverse()
-console.log(linkedList.removeAt(0))
-linkedList.traverse()
-console.log(linkedList.removeAt(2))
-linkedList.traverse()
-console.log(linkedList.get(0))
-console.log(linkedList.get(2))
-linkedList.update(0, 'ddd')
-linkedList.traverse()
-console.log(linkedList.indexOf('ddd'))
-console.log(linkedList.indexOf('aaa'))
-console.log(linkedList.remove('ddd'))
-console.log(linkedList.remove('ccc'))
+// linkedList.insert(0, '000')
+// linkedList.insert(4, '789')
+// linkedList.traverse()
+// console.log(linkedList.removeAt(2))
+// linkedList.traverse()
+// console.log(linkedList.removeAt(0))
+// linkedList.traverse()
+// console.log(linkedList.removeAt(2))
+// linkedList.traverse()
+// console.log(linkedList.get(0))
+// console.log(linkedList.get(2))
+// linkedList.update(0, 'ddd')
+// linkedList.traverse()
+// console.log(linkedList.indexOf('ddd'))
+// console.log(linkedList.indexOf('aaa'))
+// console.log(linkedList.remove('ddd'))
+// console.log(linkedList.remove('ccc'))
