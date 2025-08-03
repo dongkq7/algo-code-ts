@@ -1,4 +1,4 @@
-## 爬楼梯
+# 爬楼梯
 
 https://leetcode.cn/problems/climbing-stairs/
 
@@ -52,7 +52,7 @@ function climbStairs(n: number): number {
 };
 ```
 
-## 买卖股票最佳时期
+# 买卖股票最佳时期
 
 https://leetcode.cn/problems/best-time-to-buy-and-sell-stock/
 
@@ -145,7 +145,7 @@ function maxProfit(prices: number[]): number {
 }
 ```
 
-## 最大子数组和
+# 最大子数组和
 
 https://leetcode.cn/problems/maximum-subarray/description/
 
@@ -240,7 +240,7 @@ function maxSubArray(nums: number[]): number {
 }
 ```
 
-## 机器人运动
+# 机器人运动
 
 给定一个正数N(大于1)：1，2，3....N，机器人刚开始在S(1到N之间的数)位置，机器人要到达E位置(1到N之间的数)，机器人只能向左或向右走(也就是说机器人在1位置上的时候只能走向2，在N位置上的时候只能走向N-1)，机器人必须走K步到达E，有多少种方法？
 
@@ -369,7 +369,7 @@ function robotMove(N: number, S: number, E: number, K: number) {
 console.log(robotMove(5, 2, 4, 4))
 ```
 
-## 最少硬币
+# 最少硬币
 
 给一组正数的数，每个数字代表一枚硬币的金额，输入目标金额，返回能够凑成目标金额最少的硬币数，如果凑不出返回-1。
 
@@ -554,7 +554,9 @@ console.log(minCoins([2, 3, 100, 200], 5))
 - 推出其他位置是如何依赖的
 - 确定依次计算的顺序，然后将递归书写的内容改写成动态规划计算的过程
 
-## 谁获胜
+# 谁获胜
+
+
 
 给定一个整型数组arr，代表数值不同的纸牌排成一条线。玩家A和玩家B依次拿走每张纸
 
@@ -781,4 +783,98 @@ function predictTheWinner(nums: number[]): boolean {
   }
   return f[0][nums.length - 1] >= s[0][nums.length - 1]
 }
+```
+
+# 解码方法（从左往右尝试类）
+
+https://leetcode.cn/problems/decode-ways/description/
+
+规定1和A对应、2和B对应、3和C对应..
+
+那么一个数字字符串比如“111”，就可以转化为"AAA”、"KA"和“AK”
+
+给定一个只有数字字符组成的字符串str，返回有多少种转化结果。
+
+## 具体思路
+
+也是从左往右取尝试，比如来到了i位置，0到i-1位置已经确定下来了，求i往后有多少个有效的
+
+- 那么i位置是0，那么有0种，因为0没有办法和任何字母对应，直接返回0
+
+如果i位置不是0，那么分情况看，分两大类
+
+- 该位置不管是数字几，自己可以构成一种，然后再继续尝试后面的
+- 如果该位置上对应的数*10加上加一位小于27则也可以构成一种，然后尝试后面的
+
+经过如上的处理，i来到了length的位置，则证明处理完毕，返回1
+
+
+
+## 代码实现
+
+```typescript
+//https://leetcode.cn/problems/decode-ways/description/
+
+function numDecodings(s: string): number {
+  if (!s.length) return 0
+  return process(s, 0)
+}
+
+function process(s: string, index: number) {
+  if (index === s.length) {
+    return 1
+  }
+  // 如果对应位置为0，则没有办法解码成任何一种，返回0
+  if (s[index] === '0') {
+    return 0
+  }
+
+  // 首先该位置对应的数字可以独立解码
+  let res = process(s, index + 1)
+  // 该位置是最后一个了，那么没有必要继续组合了
+  if (index === s.length - 1) {
+    return res
+  }
+  // 如果该位置数字与后一位数字组合小于27则也可以对应一种解码方式
+  if (+s[index] * 10 + +s[index + 1] < 27) {
+    res += process(s, index + 2)
+  }
+  return res
+}
+
+console.log(numDecodings('12'))
+export {}
+```
+
+## 改为动态规划
+
+根据这几步来：
+
+- 首先分析可变参数的变化范围，只有index，是一个一维数组
+- 根据递归的basecase填充可以直接出答案的位置: `dp[n]=1`，顺便可以计算出dp[n-2]对应的值
+- 推出其他位置是如何依赖的：依赖index+1位置的结果、以及如果该位置和index+1位置组成的数小于27则还依赖index+2位置的结果，**也就是前一个位置依赖后几个位置的值，那么for循环从后往前来遍历**
+- 确定主函数需要的结果，是dp[0]
+
+
+
+```typescript
+// 动态规划版本
+function numDecodings(s: string): number {
+  if (!s.length || s === '0') return 0
+
+  const N = s.length
+  const dp: number[] = new Array(N + 1)
+  dp[N] = 1
+  // 最后一个字符如果是0则0中，否则1种
+  dp[N - 1] = s[N - 1] === '0' ? 0 : 1
+  for (let i = N - 1; i >= 0; i--) {
+    if (s[i] === '0') {
+      dp[i] = 0
+    } else {
+      dp[i] = dp[i + 1] + (+s[i] * 10 + +s[i + 1] < 27 ? dp[i + 2] : 0)
+    }
+  }
+  return dp[0]
+}
+console.log(numDecodings('12'))
 ```
