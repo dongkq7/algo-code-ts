@@ -1,4 +1,5 @@
 // morris遍历判断是否是搜索二叉树
+// https://leetcode.cn/problems/validate-binary-search-tree/description/
 
 class TreeNode {
   val: number
@@ -11,36 +12,35 @@ class TreeNode {
   }
 }
 
-function isBST(root: TreeNode | null) {
+function isValidBST(root: TreeNode | null) {
   if (root === null) {
-    return false
+    return true
   }
-
   let cur = root
+  let preValue = -Infinity
   let mostRight: TreeNode | null = null
-  let preVal: number = Number.MIN_SAFE_INTEGER
-  while (cur !== null) {
-    // 先来到左子树
+  while (cur) {
     mostRight = cur.left
-    // 如果左子树不为空，那么找到最右节点
     if (mostRight !== null) {
-      // 如果存在右节点且右节点的右指针不指向当前节点，那么一直向右移动
+      // 找到当前节点左子树的最右节点
       while (mostRight.right && mostRight.right !== cur) {
         mostRight = mostRight.right
       }
-      // 找到了最右节点
-      // 如果mostRight的最右指针为空，那么让right指向当前节点，当前节点向左移动
+      // 来到这里说明找到了左子树的最右节点
+      // 此时该节点的right要么为空要么为cur
       if (mostRight.right === null) {
+        // 让左子树的最右节点的right指向cur，cur左移，继续
         mostRight.right = cur
         cur = cur.left
         continue
       } else {
-        // 不为空则重新指向null
         mostRight.right = null
       }
     }
-    if (cur.val <= preVal) return false
-    preVal = cur.val
+    // 来到这里说明要么左子树为空，要么第二次来到了该节点，处理搜索二叉树判断逻辑
+    if (preValue >= cur.val) return false
+    preValue = cur.val
+    // 向右移动
     cur = cur.right
   }
   return true
@@ -63,5 +63,5 @@ node4.left = node4.right = null
 node5.left = node5.right = null
 node6.left = node6.right = null
 
-console.log(isBST(root))
+console.log(isValidBST(root))
 export {}

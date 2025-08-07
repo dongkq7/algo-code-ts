@@ -27,7 +27,7 @@ function morris(root: TreeNode | null) {
       while (mostRight.right && mostRight.right !== cur) {
         mostRight = mostRight.right
       }
-      // 找到了最右节点
+      // 从上面的while里出来后，mostRight就是cur左子树上的最右的节点
       // 如果mostRight的最右指针为空，那么让right指向当前节点，当前节点向左移动
       if (mostRight.right === null) {
         mostRight.right = cur
@@ -40,6 +40,8 @@ function morris(root: TreeNode | null) {
       }
     }
     console.log(cur.val)
+    // cur如果没有左子树，则向右移动
+    // 或者cur左子树上的最右节点的右指针是指向cur的，则cur向右移动
     cur = cur.right
   }
 }
